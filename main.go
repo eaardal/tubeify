@@ -16,10 +16,6 @@ import (
 	"strings"
 )
 
-//const apiKey = "AIzaSyBsSEblCxpRaJTPTDjUibqcyLvLq2SOX3o"
-//const spotifyClientId = "57fd5f017fa447c1a5299e3a9c6f1c1a"
-//const spotifyClientSecret = "b69619806d3347aa99a6dd44cfd89f4f"
-
 const (
 	youTubeApiKeyEnvName = "YOUTUBE_API_KEY"
 	spotifyClientIdEnvName = "SPOTIFY_CLIENT_ID"
@@ -34,9 +30,7 @@ var matchLineBeginningWithTimestamp = `^(\d{0,2}:\d{0,2})\s`
 var spotifyOAuthRedirectUrl = "http://localhost:8080"
 var spotifyOAuthState = uuid.Must(uuid.NewV4(), nil).String()
 
-// _EopQtSVZQY
 var youTubeVideoId = flag.String("youtube-video-id", "", "The ID of the YouTube video to scrape for songs")
-// 38q3HMXsxSpXMvR0cqCQR6
 var spotifyPlaylistId = flag.String("spotify-playlist-id", "", "The ID of the Spotify playlist to save songs to")
 
 func main() {
@@ -76,8 +70,6 @@ func verifyEnvironment() {
 	if spotifyPlaylistId == nil || *spotifyPlaylistId == "" {
 		log.Fatalf("spotify-playlist-id cli arg is missing")
 	}
-
-	log.Printf("%+v", os.Environ())
 }
 
 func setupSpotifyClient() {
