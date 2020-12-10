@@ -20,7 +20,7 @@ The video https://www.youtube.com/watch?v=_EopQtSVZQY has a video description th
 This app will try to find a track list such as this and parse it into a list of artist(s) and song names.
 It will then try to search Spotify for the scraped tracks and if it finds a match, add the tracks to the provided Spotify playlist. 
 
-## Development
+## Setup
 
 ### YouTube Authentication
 

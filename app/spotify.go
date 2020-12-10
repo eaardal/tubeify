@@ -60,10 +60,11 @@ func searchSpotifyForTracks(client *spotify.Client, tracks []Track, searchFor Sp
 		query := fmt.Sprintf("%s %s", track.MainArtist().Name, track.Track)
 		search, err := client.Search(query, spotify.SearchTypeTrack)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("spotify search failed: %v", err)
 		}
 
-		if search == nil || search.Tracks == nil {
+		if search == nil || search.Tracks == nil || len(search.Tracks.Tracks) == 0 {
+			logf("spotify", "search for '%s': found resulted in no tracks", query)
 			continue
 		}
 

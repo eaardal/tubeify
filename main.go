@@ -8,6 +8,7 @@ import (
 	"tubeify/app"
 )
 
+var youTubeVideoUrl = flag.String("youtube-video-url", "", "YouTube video URL(s) to scrape for songs")
 var youTubeVideoId = flag.String("youtube-video-id", "", "The ID of the YouTube video to scrape for songs")
 var spotifyPlaylistId = flag.String("spotify-playlist-id", "", "The ID of the Spotify playlist to save songs to")
 
@@ -20,8 +21,8 @@ func main() {
 func parseFlags() {
 	flag.Parse()
 
-	if youTubeVideoId == nil || *youTubeVideoId == "" {
-		log.Fatalf("youtube-video-id cli arg is missing")
+	if (youTubeVideoId == nil || *youTubeVideoId == "") && (youTubeVideoUrl == nil || *youTubeVideoUrl == "") {
+		log.Fatalf("youtube-video-id or youtube-video-url cli arg is missing")
 	}
 
 	if spotifyPlaylistId == nil || *spotifyPlaylistId == "" {
@@ -50,7 +51,8 @@ func spotifyOAuthCallback(auth *spotify.Authenticator) http.HandlerFunc {
 
 		app.PrintLoggedInSpotifyUserName(client)
 
-		youTubeTracks, err := app.ScrapeYouTubeVideoDescriptionForTracks(*youTubeVideoId)
+		youTubeVideoIds := app.FindYouTubeVideoIds(*youTubeVideoId, *youTubeVideoUrl)
+		youTubeTracks, err := app.ScrapeYouTubeVideoDescriptionForTracks(youTubeVideoIds)
 		if err != nil {
 			log.Fatal(err)
 		}

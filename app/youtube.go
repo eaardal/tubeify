@@ -7,37 +7,48 @@ import (
 	"google.golang.org/api/youtube/v3"
 	"log"
 	"net/http"
+	httpurl "net/url"
 	"regexp"
 	"strings"
 )
 
 const matchLineBeginningWithTimestamp = `^(\d{0,2}:\d{0,2})\s`
 
-func ScrapeYouTubeVideoDescriptionForTracks(videoId string) ([]Track, error) {
+func ScrapeYouTubeVideoDescriptionForTracks(videoIds []string) (tracks []Track, err error) {
 	yt, err := youtube.NewService(context.Background(), option.WithAPIKey(youTubeApiKey))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	res, err := yt.Videos.
-		List([]string{"snippet"}).
-		Id(videoId).
-		Do()
+	for _, videoId := range videoIds {
+		res, err := yt.Videos.
+			List([]string{"snippet"}).
+			Id(videoId).
+			Do()
 
-	if err != nil {
-		log.Fatal(err)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if res.HTTPStatusCode != http.StatusOK {
+			log.Fatalf("youtube response statuscode %d", res.HTTPStatusCode)
+		}
+
+		if len(res.Items) != 1 {
+			log.Fatalf("expected to find 1 YouTube video but got %d videos", len(res.Items))
+		}
+
+		youTubeVideo := res.Items[0]
+
+		t, err := findTracksInVideoDescription(youTubeVideo)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		tracks = append(tracks, t...)
 	}
 
-	if res.HTTPStatusCode != http.StatusOK {
-		log.Fatalf("youtube response statuscode %d", res.HTTPStatusCode)
-	}
-
-	if len(res.Items) != 1 {
-		log.Fatalf("expected to find 1 YouTube video but got %d videos", len(res.Items))
-	}
-
-	youTubeVideo := res.Items[0]
-	return findTracksInVideoDescription(youTubeVideo)
+	return tracks, nil
 }
 
 func findTracksInVideoDescription(video *youtube.Video) (tracks []Track, err error) {
@@ -243,4 +254,48 @@ func NewTrackArtist(name string, isMainTrackArtist bool) *TrackArtist {
 		Name:              name,
 		IsMainTrackArtist: isMainTrackArtist,
 	}
+}
+
+func FindYouTubeVideoIds(videoIdCLIArg string, videoUrlCLIArg string) []string {
+	ids := make([]string, 0)
+	ids = append(ids, parseVideoIdCLIArg(videoIdCLIArg)...)
+	ids = append(ids, parseVideoUrlCLIArg(videoUrlCLIArg)...)
+	return ids
+}
+
+func parseVideoIdCLIArg(videoIdCLIArg string) (ids []string) {
+	if videoIdCLIArg != "" {
+		if strings.Contains(videoIdCLIArg, ",") {
+			parts := strings.Split(videoIdCLIArg, ",")
+			for _, part := range parts {
+				ids = append(ids, strings.TrimSpace(part))
+			}
+		} else {
+			ids = append(ids, videoIdCLIArg)
+		}
+	}
+	return ids
+}
+
+func parseVideoUrlCLIArg(videoUrlCLIArg string) (ids []string) {
+	if videoUrlCLIArg != "" {
+		if strings.Contains(videoUrlCLIArg, ",") {
+			parts := strings.Split(videoUrlCLIArg, ",")
+			for _, part := range parts {
+				ids = append(ids, findVideoIdInUrl(part))
+			}
+		} else {
+			ids = append(ids, findVideoIdInUrl(videoUrlCLIArg))
+		}
+	}
+	return ids
+}
+
+func findVideoIdInUrl(url string) string {
+	trimmedUrl := strings.TrimSpace(url)
+	uri, err := httpurl.Parse(trimmedUrl)
+	if err != nil {
+		log.Fatalf("failed to parse url '%s': %s", trimmedUrl, err)
+	}
+	return uri.Query().Get("v")
 }

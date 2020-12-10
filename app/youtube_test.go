@@ -7,6 +7,23 @@ import (
 	"tubeify/app"
 )
 
+func TestFindYouTubeVideoIds(t *testing.T) {
+	testCases := map[string]string{
+		"https://www.youtube.com/watch?v=c_nTb_0XuBs": "c_nTb_0XuBs",
+		"https://www.youtube.com/watch?v=LjgYbmXbrmk": "LjgYbmXbrmk",
+		"https://www.youtube.com/watch?v=Hz23pvuO270": "Hz23pvuO270",
+	}
+	for uri, expectedId := range testCases {
+		actualUris := app.FindYouTubeVideoIds("", uri)
+		if len(actualUris) != 1 {
+			t.Fatalf("expected 1 uri, got %d", len(actualUris))
+		}
+		if actualUris[0] != expectedId {
+			t.Fatalf("expected %s but got %s", expectedId, actualUris[0])
+		}
+	}
+}
+
 /*
 ```
 0:00 Seven Lions, Last Heroes & HALIENE - Don't Wanna Fall
