@@ -64,7 +64,7 @@ func searchSpotifyForTracks(client *spotify.Client, tracks []Track, searchFor Sp
 		}
 
 		if search == nil || search.Tracks == nil || len(search.Tracks.Tracks) == 0 {
-			logf("spotify", "search for '%s': found resulted in no tracks", query)
+			logf("spotify", "search for '%s' returned empty", query)
 			continue
 		}
 

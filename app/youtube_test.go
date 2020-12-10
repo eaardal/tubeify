@@ -12,6 +12,7 @@ func TestFindYouTubeVideoIds(t *testing.T) {
 		"https://www.youtube.com/watch?v=c_nTb_0XuBs": "c_nTb_0XuBs",
 		"https://www.youtube.com/watch?v=LjgYbmXbrmk": "LjgYbmXbrmk",
 		"https://www.youtube.com/watch?v=Hz23pvuO270": "Hz23pvuO270",
+		"https://www.youtube.com/watch?v=odGPwGjqkaQ": "odGPwGjqkaQ",
 	}
 	for uri, expectedId := range testCases {
 		actualUris := app.FindYouTubeVideoIds("", uri)
