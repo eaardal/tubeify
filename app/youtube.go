@@ -14,8 +14,8 @@ import (
 
 const matchLineBeginningWithTimestamp = `^(\d{0,2}:\d{0,2})\s`
 
-func ScrapeYouTubeVideoDescriptionForTracks(videoIds []string) (tracks []Track, err error) {
-	yt, err := youtube.NewService(context.Background(), option.WithAPIKey(youTubeApiKey))
+func ScrapeYouTubeVideoDescriptionForTracks(apiKey string, videoIds []string) (tracks []Track, err error) {
+	yt, err := youtube.NewService(context.Background(), option.WithAPIKey(apiKey))
 	if err != nil {
 		log.Fatal(err)
 	}

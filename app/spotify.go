@@ -11,14 +11,14 @@ import (
 var spotifyOAuthRedirectUrl = "http://localhost:8080"
 var spotifyOAuthState = uuid.Must(uuid.NewV4(), nil).String()
 
-func CreateSpotifyAuthenticator() *spotify.Authenticator {
-	auth := spotify.NewAuthenticator(spotifyOAuthRedirectUrl, spotify.ScopeUserReadPrivate, spotify.ScopePlaylistModifyPublic)
-	auth.SetAuthInfo(spotifyClientId, spotifyClientSecret)
+func CreateSpotifyAuthenticator(clientId, clientSecret string) *spotify.Authenticator {
+	auth := spotify.NewAuthenticator(spotifyOAuthRedirectUrl, spotify.ScopeUserReadPrivate, spotify.ScopePlaylistModifyPublic, spotify.ScopePlaylistReadPrivate, spotify.ScopePlaylistModifyPrivate)
+	auth.SetAuthInfo(clientId, clientSecret)
 	return &auth
 }
 
 func CreateSpotifyOAuthUrl(auth *spotify.Authenticator) string {
-	return auth.AuthURL(spotifyOAuthState)
+	return auth.AuthURLWithOpts(spotifyOAuthState)
 }
 
 func CreateSpotifyClient(auth *spotify.Authenticator, r *http.Request) (*spotify.Client, error) {

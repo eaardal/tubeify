@@ -1,37 +1,20 @@
 package main
 
 import (
-	"flag"
 	"github.com/zmb3/spotify"
 	"log"
 	"net/http"
 	"tubeify/app"
 )
 
-var youTubeVideoUrl = flag.String("youtube-video-url", "", "YouTube video URL(s) to scrape for songs")
-var youTubeVideoId = flag.String("youtube-video-id", "", "The ID of the YouTube video to scrape for songs")
-var spotifyPlaylistId = flag.String("spotify-playlist-id", "", "The ID of the Spotify playlist to save songs to")
+var config = app.SetupEnvironment()
 
 func main() {
-	app.SetupEnvironment()
-	parseFlags()
 	runApp()
 }
 
-func parseFlags() {
-	flag.Parse()
-
-	if (youTubeVideoId == nil || *youTubeVideoId == "") && (youTubeVideoUrl == nil || *youTubeVideoUrl == "") {
-		log.Fatalf("youtube-video-id or youtube-video-url cli arg is missing")
-	}
-
-	if spotifyPlaylistId == nil || *spotifyPlaylistId == "" {
-		log.Fatalf("spotify-playlist-id cli arg is missing")
-	}
-}
-
 func runApp() {
-	auth := app.CreateSpotifyAuthenticator()
+	auth := app.CreateSpotifyAuthenticator(config.SpotifyClientId, config.SpotifyClientSecret)
 	url := app.CreateSpotifyOAuthUrl(auth)
 	println("open url in browser to authenticate (and return to this terminal immediately):")
 	println(url)
@@ -51,13 +34,13 @@ func spotifyOAuthCallback(auth *spotify.Authenticator) http.HandlerFunc {
 
 		app.PrintLoggedInSpotifyUserName(client)
 
-		youTubeVideoIds := app.FindYouTubeVideoIds(*youTubeVideoId, *youTubeVideoUrl)
-		youTubeTracks, err := app.ScrapeYouTubeVideoDescriptionForTracks(youTubeVideoIds)
+		youTubeVideoIds := app.FindYouTubeVideoIds(config.YouTubeVideoId, config.YouTubeVideoUrl)
+		youTubeTracks, err := app.ScrapeYouTubeVideoDescriptionForTracks(config.YouTubeApiKey, youTubeVideoIds)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		if err := app.AddTracksToSpotifyPlaylist(client, youTubeTracks, *spotifyPlaylistId); err != nil {
+		if err := app.AddTracksToSpotifyPlaylist(client, youTubeTracks, config.SpotifyPlaylistId); err != nil {
 			log.Fatal(err)
 		}
 
